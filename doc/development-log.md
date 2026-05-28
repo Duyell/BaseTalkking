@@ -1052,6 +1052,34 @@ const doneRef = useRef(false);
 ```
 **文件**: `client/src/components/Chat/ChatPanel.tsx`
 
+### 10.4 API Key 泄露到 GitHub (GitGuardian 告警)
+
+**问题**: 2026-05-28 推送代码后，GitGuardian 发邮件告警检测到 DeepSeek API key 泄露。
+**原因**: 编写 `doc/development-log.md` 时在配置示例中写入了完整 API key 而非占位符。文件随初始提交 `c490931` 推送到 GitHub。
+**修复**:
+1. 将文档中的 key 替换为 `sk-your-api-key-here`
+2. `git filter-branch --tree-filter` 重写全部 git 历史，将 key 字符串替换为占位符
+3. `git stash clear` + `git reflog expire` + `git gc --prune=now --aggressive` 清除残留引用
+4. `git push --force` 覆盖远程仓库
+5. 用户登录 DeepSeek 控制台删除旧 key，生成新 key
+6. 新 key 写入 `server/.env`，重启服务
+**教训**:
+- 编写文档/配置文件时，敏感值一律使用 `sk-your-key-here` 等占位符
+- `.env` / `.claude/` / `*.log` 在 `.gitignore` 中确保覆盖
+- 推送前应对所有文件做敏感信息扫描
+
+### 10.5 .claude/ 目录未 gitignored
+
+**问题**: `.claude/` 目录包含 `settings.local.json`（含测试用的 curl 命令和测试密码），未被 gitignore。
+**修复**: 在 `.gitignore` 中添加 `.claude/` 规则。
+**文件**: `.gitignore`
+
+### 10.6 server.log 被提交到仓库
+
+**问题**: `server/server.log` 日志文件随初始提交被上传到 GitHub。
+**修复**: `.gitignore` 中添加 `*.log` 规则，`git rm --cached` 移除跟踪。
+**文件**: `.gitignore`
+
 ---
 
 ## 11. 配置与环境变量
@@ -1234,3 +1262,4 @@ docker exec -i bt-mysql mysql -uapp_user -p"${DB_MYSQL_PASSWORD}" --default-char
 > 最后更新: 2026-05-28
 > 当前阶段: Phase 1 (AI 基础设施 + 基础对话) 完成
 > 下一步: Phase 2 (RAG 知识库问答)
+> 本次更新: 新增 Bug 10.4 (API Key 泄露), 10.5 (.claude/ 未 gitignored), 10.6 (server.log 误提交)
