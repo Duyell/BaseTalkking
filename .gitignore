@@ -5,6 +5,7 @@ server/bin/
 *.dll
 *.so
 *.dylib
+*.log
 
 # React / Node
 client/node_modules/
