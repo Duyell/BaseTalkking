@@ -1,0 +1,29 @@
+# Go
+server/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# React / Node
+client/node_modules/
+client/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Claude AI assistant
+.claude/
+
+# SSL (generated, not committed)
+server/deployments/ssl/*.pem

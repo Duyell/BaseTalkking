@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: bt-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme}
+      MYSQL_DATABASE: basetalkking
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./server/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "127.0.0.1:3306:3306"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+
+  redis:
+    image: redis:7-alpine
+    container_name: bt-redis
+    restart: always
+    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: deployments/Dockerfile
+    container_name: bt-backend
+    restart: always
+    environment:
+      - ENV=prod
+      - DB_MYSQL_HOST=mysql
+      - DB_MYSQL_USER=${DB_MYSQL_USER:-app_user}
+      - DB_MYSQL_PASSWORD=${DB_MYSQL_PASSWORD:-app_user_password_change_me}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production-256bit-minimum}
+    volumes:
+      - backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bt-nginx
+    restart: always
+    volumes:
+      - ./server/deployments/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./server/deployments/ssl:/etc/nginx/ssl:ro
+      - ./client/dist:/usr/share/nginx/html:ro
+      - nginx_logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+
+volumes:
+  mysql_data:
+  redis_data:
+  backend_logs:
+  nginx_logs:
