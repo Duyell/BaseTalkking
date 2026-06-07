@@ -1230,6 +1230,95 @@ docker exec -i bt-mysql mysql -uapp_user -p"${DB_MYSQL_PASSWORD}" --default-char
 
 ---
 
+## 13. 二次元清新忧郁氛围设计系统 (2026-06-07)
+
+基于 `design-taste-frontend` skill 构建的完整前端设计语言。
+
+### 13.1 设计参数
+
+| 参数 | 值 | 效果 |
+|------|------|------|
+| DESIGN_VARIANCE | 8 | 非对称网格、偏移排版、装饰线条 |
+| MOTION_INTENSITY | 6 | Spring 物理动画、Stagger 揭示、呼吸发光 |
+| VISUAL_DENSITY | 4 | 大量留白、空气感、优雅间距 |
+
+### 13.2 色板 (Anime Melancholic)
+
+**浅色主题:**
+- 背景: 渐变 `#e8ecf1 → #eef1f5 → #f2f0f5` (冷薰衣草灰)
+- 玻璃面板: `rgba(255,255,255,0.48)` + `blur(20px) saturate(140%)`
+- 主色: `#7b8db5` (低饱和蓝灰)
+- 文字: `#2c3142` (深蓝灰)
+- 粒子: `rgba(156,175,210,0.55)` (淡蓝光点)
+
+**暗色主题:**
+- 背景: 渐变 `#0d0d1f → #111128 → #151530` (深蓝紫)
+- 玻璃面板: `rgba(25,25,55,0.55)` + `blur(20px) saturate(140%)`
+- 主色: `#8a9cc9` (柔和薰衣草蓝)
+
+### 13.3 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `styles/anime-atmosphere.css` | 氛围 CSS 变量 + 关键帧动画 + 组件类 + 移动端断点 |
+| `components/Atmosphere/AtmosphereContainer.tsx` | 氛围容器 (渐变背景 + 噪点纹理 + 浮动粒子) |
+| `components/Atmosphere/FloatingParticles.tsx` | 浮动光粒子 (memo 隔离, CSS 动画, 60fps) |
+| `components/Atmosphere/GlassPanel.tsx` | Liquid Glass 面板 (framer-motion spring 入场 + 四角装饰 + hover lift) |
+| `components/Atmosphere/StaggerReveal.tsx` | Stagger 序列揭示 (spring 物理, staggerChildren) |
+| `pages/AtmospherePage.tsx` | `/welcome` 氛围展示页 — 全屏无滚动 |
+
+### 13.4 改动文件
+
+| 文件 | 改动 |
+|------|------|
+| `pages/LoginPage.tsx` | 玻璃表单 + 图标输入框 + spring 入场 + 完整交互状态 |
+| `pages/RegisterPage.tsx` | 三字段玻璃表单 + 成功状态独立面板 |
+| `pages/HomePage.tsx` | 浮动粒子 + 呼吸光晕 + 时段问候语 + ✦ 分区标签 |
+| `components/Layout/Header.tsx` | 纯白 → 玻璃态 `blur(16px)` + Phosphor 图标 |
+| `components/Layout/MainLayout.tsx` | 氛围渐变背景 |
+| `components/Layout/AdminLayout.tsx` | 同上 |
+| `components/Layout/Sidebar.tsx` | 玻璃态 + Phosphor 图标导航 |
+| `components/Post/PostCard.tsx` | 毛玻璃卡片 + hover lift + 玻璃质感 |
+| `components/Post/PostList.tsx` | `atmo-input` / `atmo-btn` 搜索栏 |
+| `styles/global.css` | 引入 `anime-atmosphere.css` |
+| `router/index.tsx` | 新增 `/welcome` 路由 |
+
+### 13.5 新依赖
+
+```json
+{
+  "framer-motion": "^12.x",
+  "@phosphor-icons/react": "^2.x"
+}
+```
+
+Phosphor 图标替代原生 emoji（符合 skill Anti-Emoji Policy）。
+Framer Motion 提供 spring 物理动画、stagger 序列、AnimatePresence。
+
+### 13.6 移动端适配
+
+| 断点 | 适配内容 |
+|------|------|
+| ≤768px | Header 文字标签隐藏仅留图标、首页欢迎区垂直堆叠、PostCard 内边距收紧 |
+| ≤480px | body 禁止横向溢出、搜索栏垂直排列、粒子降速省 GPU、管理后台链接隐藏 |
+
+### 13.7 性能设计
+
+- 粒子: `React.memo` + 纯 CSS 动画 + `will-change: transform`
+- 噪点纹理: `position: fixed; pointer-events: none; z-index: 50` — 不触发 repaint
+- 所有动画: 仅 `transform` + `opacity` (硬件加速)
+- `prefers-reduced-motion` 禁用所有动画
+- 毛玻璃: 移动端降低 blur 强度
+
+### 13.8 Bug 修复
+
+- CommentItem `showToast` 缺少第二个 `type` 参数 (TS2554)
+- Welcome 页内容溢出导致滚动条 → `atmo-page-fixed` 锁定 `100dvh`
+- HomePage `atmo-glow` 负值坐标溢出产生横向滚动条 → `overflow:hidden` + 边界修正
+- 根目录误安装的 `node_modules/` / `package.json` 清理
+
+---
+
 ## 附录 A: 关键设计决策
 
 | 决策 | 方案 | 原因 |
@@ -1259,7 +1348,7 @@ docker exec -i bt-mysql mysql -uapp_user -p"${DB_MYSQL_PASSWORD}" --default-char
 
 ---
 
-> 最后更新: 2026-05-28
+> 最后更新: 2026-06-07
 > 当前阶段: Phase 1 (AI 基础设施 + 基础对话) 完成
 > 下一步: Phase 2 (RAG 知识库问答)
-> 本次更新: 新增 Bug 10.4 (API Key 泄露), 10.5 (.claude/ 未 gitignored), 10.6 (server.log 误提交)
+> 本次更新: 新增 13. 二次元清新忧郁氛围设计系统 (taste-skill 驱动)
