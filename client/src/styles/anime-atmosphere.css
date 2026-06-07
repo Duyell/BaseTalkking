@@ -1,0 +1,532 @@
+/* ============================================================
+   Anime Melancholic Atmosphere Design System
+   二次元清新忧郁氛围 — 扩展 CSS 变量 + 动画定义
+   ============================================================ */
+
+/* ---- Theme Extension Variables ---- */
+[data-theme="light"] {
+  /* Atmosphere palette */
+  --atmo-bg-start: #e8ecf1;
+  --atmo-bg-mid: #eef1f5;
+  --atmo-bg-end: #f2f0f5;
+  --atmo-glass-bg: rgba(255, 255, 255, 0.48);
+  --atmo-glass-border: rgba(255, 255, 255, 0.55);
+  --atmo-glass-shadow: rgba(149, 157, 185, 0.12);
+  --atmo-accent: #7b8db5;
+  --atmo-accent-soft: #9daecf;
+  --atmo-accent-glow: rgba(123, 141, 181, 0.18);
+  --atmo-text-primary: #2c3142;
+  --atmo-text-secondary: #5a6078;
+  --atmo-text-muted: #8b90a5;
+  --atmo-decorative-line: rgba(123, 141, 181, 0.15);
+  --atmo-particle: rgba(156, 175, 210, 0.55);
+  --atmo-particle-bright: rgba(180, 195, 230, 0.7);
+  --atmo-overlay-gradient: linear-gradient(
+    160deg,
+    rgba(210, 218, 235, 0.35) 0%,
+    rgba(225, 220, 240, 0.25) 40%,
+    rgba(235, 232, 242, 0.3) 100%
+  );
+  --atmo-input-bg: rgba(255, 255, 255, 0.65);
+  --atmo-input-focus: rgba(145, 165, 200, 0.25);
+  --atmo-card-hover: rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="dark"] {
+  --atmo-bg-start: #0d0d1f;
+  --atmo-bg-mid: #111128;
+  --atmo-bg-end: #151530;
+  --atmo-glass-bg: rgba(25, 25, 55, 0.55);
+  --atmo-glass-border: rgba(255, 255, 255, 0.07);
+  --atmo-glass-shadow: rgba(0, 0, 0, 0.35);
+  --atmo-accent: #8a9cc9;
+  --atmo-accent-soft: #7b8eb8;
+  --atmo-accent-glow: rgba(138, 156, 201, 0.12);
+  --atmo-text-primary: #d8dae5;
+  --atmo-text-secondary: #a0a5bc;
+  --atmo-text-muted: #6b7088;
+  --atmo-decorative-line: rgba(138, 156, 201, 0.12);
+  --atmo-particle: rgba(138, 156, 201, 0.22);
+  --atmo-particle-bright: rgba(160, 178, 220, 0.3);
+  --atmo-overlay-gradient: linear-gradient(
+    160deg,
+    rgba(20, 20, 45, 0.4) 0%,
+    rgba(25, 22, 48, 0.3) 40%,
+    rgba(30, 28, 50, 0.35) 100%
+  );
+  --atmo-input-bg: rgba(30, 30, 60, 0.55);
+  --atmo-input-focus: rgba(138, 156, 201, 0.15);
+  --atmo-card-hover: rgba(30, 30, 60, 0.35);
+}
+
+/* ---- Atmosphere Background ---- */
+.atmo-bg {
+  position: relative;
+  min-height: 100dvh;
+  background: linear-gradient(
+    170deg,
+    var(--atmo-bg-start) 0%,
+    var(--atmo-bg-mid) 50%,
+    var(--atmo-bg-end) 100%
+  );
+  overflow: hidden;
+}
+
+/* Subtle animated gradient overlay */
+.atmo-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--atmo-overlay-gradient);
+  animation: atmoGradientDrift 20s ease-in-out infinite;
+}
+
+@keyframes atmoGradientDrift {
+  0%, 100% { opacity: 0.6; }
+  25% { opacity: 0.8; }
+  50% { opacity: 0.5; }
+  75% { opacity: 0.75; }
+}
+
+/* ---- Noise Texture Overlay (fixed, pointer-events-none) ---- */
+.atmo-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Floating Particles Container ---- */
+.atmo-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.atmo-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--atmo-particle);
+  will-change: transform, opacity;
+  animation: atmoFloatUp linear infinite;
+}
+
+.atmo-particle-bright {
+  background: var(--atmo-particle-bright);
+  box-shadow: 0 0 6px var(--atmo-particle-bright);
+}
+
+@keyframes atmoFloatUp {
+  0% {
+    transform: translateY(105vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* ---- Liquid Glass Panel ---- */
+.glass-panel {
+  position: relative;
+  background: var(--atmo-glass-bg);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--atmo-glass-border);
+  border-radius: 24px;
+  box-shadow:
+    0 8px 32px var(--atmo-glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px var(--atmo-glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.glass-panel-sm {
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+}
+
+/* ---- Decorative Line ---- */
+.atmo-line {
+  width: 60px;
+  height: 1px;
+  background: var(--atmo-decorative-line);
+  margin: 0 auto;
+  position: relative;
+}
+
+.atmo-line::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--atmo-accent-soft);
+  opacity: 0.5;
+}
+
+.atmo-line-vertical {
+  width: 1px;
+  height: 40px;
+  background: var(--atmo-decorative-line);
+  margin: 0 auto;
+}
+
+/* ---- Breathing Glow ---- */
+.atmo-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--atmo-accent-glow);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: atmoBreathingGlow 6s ease-in-out infinite;
+}
+
+@keyframes atmoBreathingGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
+}
+
+/* ---- Staggered Reveal ---- */
+.atmo-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: atmoFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes atmoFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Input Fields (anime style) ---- */
+.atmo-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--atmo-glass-border);
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--atmo-text-primary);
+  background: var(--atmo-input-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  outline: none;
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.atmo-input::placeholder {
+  color: var(--atmo-text-muted);
+}
+
+.atmo-input:focus {
+  border-color: var(--atmo-accent-soft);
+  box-shadow: 0 0 0 3px var(--atmo-input-focus);
+  background: var(--atmo-input-bg);
+}
+
+/* ---- Primary Button (anime style) ---- */
+.atmo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-text-inverse);
+  background: linear-gradient(
+    135deg,
+    var(--atmo-accent) 0%,
+    var(--atmo-accent-soft) 100%
+  );
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.2s ease;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+}
+
+.atmo-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--atmo-accent-glow);
+}
+
+.atmo-btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px var(--atmo-accent-glow);
+}
+
+.atmo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ripple effect for buttons */
+.atmo-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.atmo-btn:hover::after {
+  opacity: 1;
+}
+
+/* ---- Ghost/Secondary Button ---- */
+.atmo-btn-ghost {
+  background: var(--atmo-glass-bg);
+  border: 1px solid var(--atmo-glass-border);
+  color: var(--atmo-text-primary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.atmo-btn-ghost:hover {
+  background: var(--atmo-card-hover);
+  box-shadow: 0 4px 16px var(--atmo-glass-shadow);
+}
+
+/* ---- Page Transition Container ---- */
+.atmo-page {
+  position: relative;
+  z-index: 2;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* No-scroll variant: forces exact viewport height, no overflow */
+.atmo-page-fixed {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+/* ---- Typography ---- */
+.atmo-title {
+  font-size: 2.4rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  color: var(--atmo-text-primary);
+}
+
+.atmo-subtitle {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  color: var(--atmo-text-secondary);
+}
+
+.atmo-caption {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--atmo-text-muted);
+  text-transform: uppercase;
+}
+
+/* ---- Decorative Corner Accents ---- */
+.atmo-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.atmo-corner-tl { top: -1px; left: -1px; border-top: 1px solid var(--atmo-accent-soft); border-left: 1px solid var(--atmo-accent-soft); }
+.atmo-corner-tr { top: -1px; right: -1px; border-top: 1px solid var(--atmo-accent-soft); border-right: 1px solid var(--atmo-accent-soft); }
+.atmo-corner-bl { bottom: -1px; left: -1px; border-bottom: 1px solid var(--atmo-accent-soft); border-left: 1px solid var(--atmo-accent-soft); }
+.atmo-corner-br { bottom: -1px; right: -1px; border-bottom: 1px solid var(--atmo-accent-soft); border-right: 1px solid var(--atmo-accent-soft); }
+
+/* ---- Shimmer Skeleton Loader ---- */
+.atmo-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--atmo-glass-bg) 25%,
+    var(--atmo-card-hover) 50%,
+    var(--atmo-glass-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: atmoShimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes atmoShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- Responsive: Tablet ---- */
+@media (max-width: 768px) {
+  .atmo-title {
+    font-size: 1.6rem;
+  }
+
+  .atmo-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .glass-panel {
+    border-radius: 20px;
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+  }
+
+  .atmo-page {
+    padding: 16px;
+    justify-content: flex-start;
+    padding-top: 60px;
+  }
+
+  .atmo-btn {
+    padding: 10px 22px;
+    font-size: 14px;
+  }
+
+  .atmo-input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* Header: compact mode */
+  .header-logo-text {
+    font-size: 16px;
+  }
+
+  .header-nav-label {
+    display: none;
+  }
+
+  /* Home: stack welcome banner */
+  .home-welcome {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* PostCard: tighter padding */
+  .post-card-inner {
+    padding: 14px 16px;
+  }
+}
+
+/* ---- Responsive: Phone ---- */
+@media (max-width: 480px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  .atmo-title {
+    font-size: 1.35rem;
+  }
+
+  .atmo-subtitle {
+    font-size: 0.82rem;
+  }
+
+  .atmo-page {
+    padding: 12px;
+    padding-top: 48px;
+  }
+
+  .glass-panel {
+    border-radius: 16px;
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+  }
+
+  /* Header: hide admin link and user name on tiny screens */
+  .header-admin-link,
+  .header-user-label {
+    display: none;
+  }
+
+  /* Buttons and inputs */
+  .atmo-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .atmo-input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* PostCard */
+  .post-card-inner {
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  /* Reduce particle count via slower animation (cheaper) */
+  .atmo-particle {
+    animation-duration: 20s !important;
+  }
+
+  /* Search bar stacks on mobile */
+  .search-row {
+    flex-direction: column;
+  }
+
+  .search-row .atmo-btn {
+    width: 100%;
+  }
+}
+
+/* ---- Accessibility: Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .atmo-particle,
+  .atmo-glow,
+  .atmo-reveal {
+    animation-duration: 0.01ms !important;
+  }
+}

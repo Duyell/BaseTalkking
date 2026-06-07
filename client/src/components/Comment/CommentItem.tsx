@@ -25,7 +25,7 @@ export default function CommentItem({ comment, floor, currentUserId, isPostOwner
     try {
       const data = await pinComment(comment.id, comment.post_id);
       setPinned(data.is_pinned === 1);
-      showToast(data.is_pinned === 1 ? '置顶成功' : '取消置顶');
+      showToast(data.is_pinned === 1 ? '置顶成功' : '取消置顶', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : '操作失败', 'error');
     }

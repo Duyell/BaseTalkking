@@ -5,6 +5,7 @@ import Loading from '../Common/Loading';
 import Empty from '../Common/Empty';
 import { getPostList } from '../../api/post';
 import type { Post } from '../../types/post';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 
 export default function PostList() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -18,7 +19,7 @@ export default function PostList() {
   useEffect(() => {
     setLoading(true);
     getPostList({ page, page_size: pageSize, keyword })
-      .then(data => {
+      .then((data) => {
         setPosts(data.list);
         setTotal(data.total);
       })
@@ -32,32 +33,44 @@ export default function PostList() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        <input
-          type="text"
-          value={searchInput}
-          onChange={e => setSearchInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
-          placeholder="搜索帖子标题..."
-          style={{
-            flex: 1, padding: '8px 12px', border: '1px solid var(--color-border)',
-            borderRadius: 4, fontSize: 14, background: 'var(--color-bg-white)', color: 'var(--color-text)',
-          }}
-        />
-        <button
-          onClick={handleSearch}
-          style={{ padding: '8px 20px', background: 'var(--color-primary)', color: 'var(--color-text-inverse)', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-        >
+      {/* Search bar */}
+      <div className="search-row" style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <MagnifyingGlass
+            size={16}
+            weight="light"
+            style={{
+              position: 'absolute',
+              left: 14,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--atmo-text-muted)',
+              pointerEvents: 'none',
+            }}
+          />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="搜索帖子标题..."
+            className="atmo-input"
+            style={{ paddingLeft: 40 }}
+          />
+        </div>
+        <button onClick={handleSearch} className="atmo-btn" style={{ padding: '10px 22px' }}>
+          <MagnifyingGlass size={16} weight="light" />
           搜索
         </button>
       </div>
 
+      {/* Content states */}
       {loading ? (
         <Loading />
       ) : posts.length === 0 ? (
         <Empty message={keyword ? '没有搜索到相关帖子' : '还没有帖子，来发布第一个吧'} />
       ) : (
-        posts.map(post => <PostCard key={post.id} post={post} />)
+        posts.map((post) => <PostCard key={post.id} post={post} />)
       )}
 
       <Pagination current={page} total={total} pageSize={pageSize} onChange={setPage} />

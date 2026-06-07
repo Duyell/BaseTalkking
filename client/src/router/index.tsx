@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import HomePage from '../pages/HomePage';
+import AtmospherePage from '../pages/AtmospherePage';
 import PostDetailPage from '../pages/PostDetailPage';
 import PostCreatePage from '../pages/PostCreatePage';
 import PostEditPage from '../pages/PostEditPage';
@@ -17,6 +18,7 @@ import MainLayout from '../components/Layout/MainLayout';
 import AdminLayout from '../components/Layout/AdminLayout';
 
 const router = createBrowserRouter([
+  { path: '/welcome', element: <AtmospherePage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   {
